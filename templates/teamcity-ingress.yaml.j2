@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: "{{ teamcity['app_name'] }}-ingress"
+  namespace: "{{ teamcity['namespace'] }}"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            backend:
+              serviceName: "{{ teamcity['app_name'] }}-svc"
+              servicePort: 80

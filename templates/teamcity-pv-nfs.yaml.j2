@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ teamcity['app_name'] }}-pv-nfs"
+  namespace: "{{ teamcity['namespace'] }}"
+spec:
+  storageClassName: ""
+  claimRef:
+    name: "{{ teamcity['app_name'] }}-pvc-nfs"
+    namespace: "{{ teamcity['namespace'] }}"
+  accessModes:
+    - ReadWriteMany
+  mountOptions:
+    - nfsvers=4.1
+    - lookupcache=positive
+  capacity:
+    storage: "{{ teamcity['shared_data_directory']['nfs_capacity'] }}"
+  nfs:
+    server: "{{ teamcity['shared_data_directory']['nfs_server_ip'] }}"
+    path: "{{ teamcity['shared_data_directory']['nfs_server_path'] }}"

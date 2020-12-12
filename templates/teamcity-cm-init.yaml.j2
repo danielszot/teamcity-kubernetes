@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ teamcity['app_name'] }}-cm-init"
+  namespace: "{{ teamcity['namespace'] }}"
+data:
+  download_addons.sh: |-
+    #!/bin/sh
+    {% if teamcity['addons'] is defined %}
+    {% for addon in teamcity['addons'] %}
+    curl -o /downloads/{{ addon['name'] }}.zip {{ addon['url'] }} -L
+    mkdir -p /downloads/{{ addon['name'] }}
+    unzip -o /downloads/{{ addon['name'] }}.zip -d /downloads/{{ addon['name'] }}
+    mkdir -p {{ addon['unzip_to'] }}
+    find /downloads/{{ addon['name'] }} -type f -name {{ addon['fn_pattern'] }} -exec cp {} {{ addon['unzip_to'] }} \;
+    {% endfor %}
+    {% endif %}

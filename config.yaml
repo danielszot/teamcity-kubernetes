@@ -1,0 +1,61 @@
+---
+common:
+  teamcity:
+    namespace: teamcity
+    app_name: teamcity
+    image: jetbrains/teamcity-server:2020.2
+    server_mem_opts: -Xmx1g
+    resources_requests:
+      cpu: 500m
+      memory: 1200Mi
+    shared_data_directory:
+      nfs_server_ip: 172.18.8.99
+      nfs_server_path: /srv/nfs/data
+      nfs_capacity: 1Gi
+    external_database:
+      db_name: teamcity
+      db_user: teamcity
+      db_password: "{{ env='TCK8S_TEAMCITY_DB_PASSWORD' }}"
+    addons:
+      - name: mysql-connector-java
+        url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.22.zip
+        fn_pattern: "*.jar"
+        unzip_to: /data/teamcity_server/datadir/lib/jdbc
+
+  mysql:
+    namespace: mysql
+    app_name: mysql
+    root_password: "{{ env='TCK8S_MYSQL_ROOT_PASSWORD' }}"
+    image: "mysql:8.0"
+    resources_requests:
+      cpu: 300m
+      memory: 500Mi
+    data_directory:
+      nfs_server_ip: 172.18.8.99
+      nfs_server_path: /srv/nfs/db
+      nfs_capacity: 1Gi
+
+  minio:
+    namespace: minio
+
+vagrant:
+  templates:
+  - group:
+    - template: mysql-ns.yaml.j2
+    - template: mysql-pv.yaml.j2
+    - template: mysql-pvc.yaml.j2
+    - template: mysql-secret.yaml.j2
+    - template: mysql-svc.yaml.j2
+    - template: mysql-statefulset.yaml.j2
+    tags: mysql
+  - group:
+    - template: teamcity-ns.yaml.j2
+    - template: teamcity-pv-nfs.yaml.j2
+    - template: teamcity-pvc-nfs.yaml.j2
+    - template: teamcity-svc.yaml.j2
+    - template: teamcity-svc-headless.yaml.j2
+    - template: teamcity-cm-init.yaml.j2
+    - template: teamcity-secret-mysql.yaml.j2
+    - template: teamcity-ingress.yaml.j2
+    - template: teamcity-statefulset.yaml.j2
+    tags: teamcity

@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ teamcity['app_name'] }}"
+  namespace: "{{ teamcity['namespace'] }}"
+  labels:
+    app: "{{ teamcity['app_name'] }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ teamcity['app_name'] }}"
+  serviceName: "{{ teamcity['app_name'] }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ teamcity['app_name'] }}"
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: addons-download
+          image: curlimages/curl
+          command:
+            - "sh"
+            - "/download_addons.sh"
+          volumeMounts:
+            - mountPath: "/downloads"
+              name: addon-download
+            - mountPath: "/download_addons.sh"
+              name: downloadscript
+              subPath: download_addons.sh
+            - mountPath: "/data/teamcity_server/datadir"
+              name: datadir
+      containers:
+        - name: teamcity
+          image: "{{ teamcity['image'] }}"
+          env:
+            - name: TEAMCITY_SERVER_MEM_OPTS
+              value: "{{ teamcity['server_mem_opts'] }}"
+            - name: TEAMCITY_SERVER_OPTS
+              value: >-
+                -Dteamcity.caches.path=/tmp/teamcity
+                -Dteamcity.startup.maintenance=false
+          ports:
+            - name: teamcity
+              containerPort: 8111
+          resources:
+            requests:
+              cpu: "{{ teamcity['resources_requests']['cpu'] }}"
+              memory: "{{ teamcity['resources_requests']['memory'] }}"
+          readinessProbe:
+            httpGet:
+              path: /login.html
+              port: 8111
+            initialDelaySeconds: 180
+            periodSeconds: 2
+            timeoutSeconds: 10
+            failureThreshold: 2
+            successThreshold: 2
+          volumeMounts:
+            - mountPath: "/tmp/teamcity"
+              name: cache
+            - mountPath: "/opt/teamcity/temp"
+              name: temp
+            - mountPath: "/opt/teamcity/logs"
+              name: logs
+            - mountPath: /data/teamcity_server/datadir/config/database.properties
+              name: dbproperties
+              subPath: database.properties
+              readOnly: true
+            - mountPath: "/data/teamcity_server/datadir"
+              name: datadir
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: temp
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+        - name: addon-download
+          emptyDir: {}
+        - name: dbproperties
+          secret:
+            secretName: "{{ teamcity['app_name'] }}-secret-mysql"
+        - name: downloadscript
+          configMap:
+            name: "{{ teamcity['app_name'] }}-cm-init"
+        - name: datadir
+          persistentVolumeClaim:
+            claimName: "{{ teamcity['app_name'] }}-pvc-nfs"

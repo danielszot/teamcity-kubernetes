@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ mysql['app_name'] }}"
+  namespace: "{{ mysql['namespace'] }}"
+  labels:
+    app: "{{ mysql['app_name'] }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ mysql['app_name'] }}"
+  serviceName: "{{ mysql['app_name'] }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ mysql['app_name'] }}"
+    spec:
+      containers:
+        - name: mysql
+          image: "{{ mysql['image'] }}"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ mysql['app_name'] }}-secret"
+                  key: root_password
+            - name: MYSQL_DATABASE
+              value: "{{ teamcity['external_database']['db_name'] }}"
+            - name: MYSQL_USER
+              value: "{{ teamcity['external_database']['db_user'] }}"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ mysql['app_name'] }}-secret"
+                  key: db_password
+          ports:
+            - name: mysql
+              containerPort: 3306
+          resources:
+            requests:
+              cpu: "{{ mysql['resources_requests']['cpu'] }}"
+              memory: "{{ mysql['resources_requests']['memory'] }}"
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - "-c"
+                - |
+                  set -ex
+                  mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - "-c"
+                - |
+                  set -ex
+                  mysql -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD -e "SELECT 1" &> /dev/null
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            timeoutSeconds: 1
+          volumeMounts:
+            - mountPath: "/var/lib/mysql"
+              name: dbdata
+      volumes:
+        - name: dbdata
+          persistentVolumeClaim:
+            claimName: "{{ mysql['app_name'] }}-pvc"

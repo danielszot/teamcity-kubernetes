@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ mysql['app_name'] }}"
+  namespace: "{{ mysql['namespace'] }}"
+  labels:
+    app: "{{ mysql['app_name'] }}"
+spec:
+  clusterIP: None
+  ports:
+    - name: mysql
+      port: 3306
+      protocol: TCP
+  selector:
+    app: "{{ mysql['app_name'] }}"

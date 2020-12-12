@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ teamcity['app_name'] }}-pvc-nfs"
+  namespace: "{{ teamcity['namespace'] }}"
+spec:
+  storageClassName: ""
+  volumeName: "{{ teamcity['app_name'] }}-pv-nfs"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "{{ teamcity['shared_data_directory']['nfs_capacity'] }}"
