@@ -4,10 +4,13 @@ common:
     namespace: teamcity
     app_name: teamcity
     image: jetbrains/teamcity-server:2020.2
-    server_mem_opts: -Xmx1g
+    server_mem_opts: -Xmx512m
     resources_requests:
-      cpu: 500m
-      memory: 1200Mi
+      cpu: 0m
+      memory: 600Mi
+    resources_limits:
+      cpu: 300m
+      memory: 600Mi
     shared_data_directory:
       nfs_server_ip: 172.18.8.99
       nfs_server_path: /srv/nfs/data
@@ -21,6 +24,7 @@ common:
         url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.22.zip
         fn_pattern: "*.jar"
         unzip_to: /data/teamcity_server/datadir/lib/jdbc
+    secondary_nodes_replicas: 1
 
   mysql:
     namespace: mysql
@@ -28,8 +32,8 @@ common:
     root_password: "{{ env='TCK8S_MYSQL_ROOT_PASSWORD' }}"
     image: "mysql:8.0"
     resources_requests:
-      cpu: 300m
-      memory: 500Mi
+      cpu: 100m
+      memory: 200Mi
     data_directory:
       nfs_server_ip: 172.18.8.99
       nfs_server_path: /srv/nfs/db
@@ -37,6 +41,24 @@ common:
 
   minio:
     namespace: minio
+    app_name: minio
+    image: "minio/minio:RELEASE.2020-11-19T23-48-16Z"
+    mc_image: "minio/mc:RELEASE.2020-11-17T00-39-14Z"
+    volumes_per_node: 2
+    volume_capacity: 512Mi
+    # Local directory to be used as a place where minio will store the data, must exists.
+    node_local_path_for_storage: /data/minio
+    # List of node names to create persistance volumes for.
+    nodes_names_to_create_pv:
+      - k8s-1
+      - k8s-2
+      - k8s-3
+    # List of buckets to be automatically createad after minio setup
+    buckets:
+      - name: teamcity
+        policy: none
+        purge: false
+        versioning: true
 
 vagrant:
   templates:
@@ -49,6 +71,12 @@ vagrant:
     - template: mysql-statefulset.yaml.j2
     tags: mysql
   - group:
+    - template: minio-ns.yaml.j2
+    - template: minio-sc.yaml.j2
+    - template: minio-pv.yaml.j2
+    - template: minio-tenant.yaml.j2
+    tags: minio
+  - group:
     - template: teamcity-ns.yaml.j2
     - template: teamcity-pv-nfs.yaml.j2
     - template: teamcity-pvc-nfs.yaml.j2
@@ -58,4 +86,10 @@ vagrant:
     - template: teamcity-secret-mysql.yaml.j2
     - template: teamcity-ingress.yaml.j2
     - template: teamcity-statefulset.yaml.j2
+    - template: teamcity-secondary-svc-headless.yaml.j2
+    - template: teamcity-secondary-statefulset.yaml.j2
     tags: teamcity
+  - group:
+    - template: minio-cm-create-buckets-script.yaml.j2
+    - template: minio-job-create-buckets.yaml.j2
+    tags: create-bucket

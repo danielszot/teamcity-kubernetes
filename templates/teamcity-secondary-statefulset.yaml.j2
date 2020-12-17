@@ -1,52 +1,49 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: "{{ teamcity['app_name'] }}"
+  name: "{{ teamcity['app_name'] }}-secondary"
   namespace: "{{ teamcity['namespace'] }}"
   labels:
     app: "{{ teamcity['app_name'] }}"
-    node: "primary"
+    node: "secondary"
 spec:
-  replicas: 1
+  replicas: {{ teamcity['secondary_nodes_replicas'] }}
   selector:
     matchLabels:
       app: "{{ teamcity['app_name'] }}"
-      node: "primary"
-  serviceName: "{{ teamcity['app_name'] }}"
+      node: "secondary"
+  serviceName: "{{ teamcity['app_name'] }}-secondary"
   template:
     metadata:
       labels:
         app: "{{ teamcity['app_name'] }}"
-        node: "primary"
+        node: "secondary"
     spec:
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - "{{ teamcity['app_name'] }}"
-            topologyKey: "kubernetes.io/hostname"
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - "{{ teamcity['app_name'] }}"
+              topologyKey: "kubernetes.io/hostname"
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
       initContainers:
-        - name: addons-download
+        - name: wait-for-primary
           image: curlimages/curl
           command:
             - "sh"
-            - "/download_addons.sh"
+            - "-c"
+            - "sh /wait-for-200.sh {{ teamcity['app_name'] }}-0.{{ teamcity['app_name'] }}:8111/login.html"
           volumeMounts:
-            - mountPath: "/downloads"
-              name: addon-download
-            - mountPath: "/download_addons.sh"
+            - mountPath: "/wait-for-200.sh"
               name: initscripts
-              subPath: download_addons.sh
-            - mountPath: "/data/teamcity_server/datadir"
-              name: datadir
+              subPath: wait-for-200.sh
       containers:
         - name: teamcity
           image: "{{ teamcity['image'] }}"
@@ -57,6 +54,9 @@ spec:
               value: >-
                 -Dteamcity.caches.path=/tmp/teamcity
                 -Dteamcity.startup.maintenance=false
+                -Dteamcity.server.nodeId=$HOSTNAME
+                -Dteamcity.node.data.path=/tmp/teamcity/node-data
+                -Dteamcity.server.rootURL=http://{{ teamcity['app_name'] }}.{{ teamcity['namespace'] }}.svc
           ports:
             - name: teamcity
               containerPort: 8111
@@ -83,6 +83,8 @@ spec:
               name: temp
             - mountPath: "/opt/teamcity/logs"
               name: logs
+            - mountPath: "/tmp/teamcity/node-data"
+              name: node-data-path
             - mountPath: /data/teamcity_server/datadir/config/database.properties
               name: dbproperties
               subPath: database.properties
@@ -97,6 +99,8 @@ spec:
         - name: logs
           emptyDir: {}
         - name: addon-download
+          emptyDir: {}
+        - name: node-data-path
           emptyDir: {}
         - name: dbproperties
           secret:

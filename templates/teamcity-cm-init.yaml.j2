@@ -15,3 +15,10 @@ data:
     find /downloads/{{ addon['name'] }} -type f -name {{ addon['fn_pattern'] }} -exec cp {} {{ addon['unzip_to'] }} \;
     {% endfor %}
     {% endif %}
+
+  wait-for-200.sh: |-
+    #!/bin/sh
+    set -x;
+    while [ $(curl -sw '%{http_code}' "$1" -o /dev/null) -ne 200 ]; do
+      sleep 5;
+    done

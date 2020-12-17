@@ -13,3 +13,13 @@ spec:
             backend:
               serviceName: "{{ teamcity['app_name'] }}-svc"
               servicePort: 80
+          - path: /maintenance/primary
+            backend:
+              serviceName: "{{ teamcity['app_name'] }}-svc-0"
+              servicePort: 80
+{% for i in range(teamcity['secondary_nodes_replicas']) %}
+          - path: /maintenance/secondary/{{ i }}
+            backend:
+              serviceName: "{{ teamcity['app_name'] }}-secondary-{{ i }}"
+              servicePort: 80
+{% endfor %}

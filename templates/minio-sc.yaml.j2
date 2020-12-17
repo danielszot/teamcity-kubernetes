@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "{{ minio['app_name'] }}-local-storage"
+  namespace: "{{ minio['namespace'] }}"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+#volumeBindingMode: Immediate
+reclaimPolicy: Retain

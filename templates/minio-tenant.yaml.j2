@@ -1,0 +1,71 @@
+apiVersion: minio.min.io/v1
+kind: Tenant
+metadata:
+  name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}"
+  namespace: "{{ minio['namespace'] }}"
+scheduler:
+  name: ""
+spec:
+  certConfig: {}
+  console:
+    consoleSecret:
+      name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-console-secret"
+    image: minio/console:v0.3.14
+    metadata:
+      creationTimestamp: null
+      name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}"
+    replicas: 2
+    resources: {}
+  credsSecret:
+    name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-creds-secret"
+  image: "{{ minio['image'] }}"
+  imagePullSecret: {}
+  mountPath: /export
+  requestAutoCert: false
+  serviceName: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-internal-service"
+  zones:
+  - resources: {}
+    servers: {{ minio['nodes_names_to_create_pv'] | length }}
+    volumeClaimTemplate:
+      apiVersion: v1
+      kind: persistentvolumeclaims
+      metadata:
+        creationTimestamp: null
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: "{{ minio['volume_capacity'] }}"
+        storageClassName: "{{ minio['app_name'] }}-local-storage"
+      status: {}
+    volumesPerServer: {{ minio['volumes_per_node'] }}
+status:
+  availableReplicas: 0
+  currentState: ""
+
+---
+apiVersion: v1
+data:
+  accesskey: OTM5ZTdiMGYtMGJhYy00MzhlLWIzNjctMjlhZjRiZDkxYTRk
+  secretkey: NmFkMzEzODQtMTgwZC00YjFmLTlhYmEtMzAwY2M5NjdjZGJl
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-creds-secret"
+  namespace: "{{ minio['namespace'] }}"
+
+---
+apiVersion: v1
+data:
+  CONSOLE_ACCESS_KEY: YTk3MDA5NzUtNzBhZi00NWRhLTliZTUtOWU4MDYxZDg2YzUx
+  CONSOLE_HMAC_JWT_SECRET: YTUxYTQzMDItNGEyNC00NTZiLWEwZGYtNjQzN2YxM2M4ZWFi
+  CONSOLE_PBKDF_PASSPHRASE: ODMzYjBmYzItNjc4ZC00OGQxLTkxNDQtMWFmMmY1M2UxZmYw
+  CONSOLE_PBKDF_SALT: ZWE4YjRlZGUtYTZiMi00MjcyLTkzNjEtN2RiM2UyOTJkYzUz
+  CONSOLE_SECRET_KEY: ZGIwNWQzNjMtMzZmYy00ZGJjLWJlNmEtNjMxY2U4ODQzZWRl
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-console-secret"
+  namespace: "{{ minio['namespace'] }}"
+

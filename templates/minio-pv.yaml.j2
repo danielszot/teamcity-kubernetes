@@ -1,0 +1,50 @@
+{% for node in minio['nodes_names_to_create_pv'] %}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ minio['app_name'] }}-{{ node }}-pv-0"
+  namespace: "{{ minio['namespace'] }}"
+spec:
+  capacity:
+    storage: "{{ minio['volume_capacity'] }}"
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: "{{ minio['app_name'] }}-local-storage"
+  local:
+    path: "{{ minio['node_local_path_for_storage'] }}/export0"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ node }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ minio['app_name'] }}-{{ node }}-pv-1"
+  namespace: "{{ minio['namespace'] }}"
+spec:
+  capacity:
+    storage: "{{ minio['volume_capacity'] }}"
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: "{{ minio['app_name'] }}-local-storage"
+  local:
+    path: "{{ minio['node_local_path_for_storage'] }}/export1"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ node }}
+{% endfor %}
