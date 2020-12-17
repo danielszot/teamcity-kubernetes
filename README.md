@@ -181,9 +181,9 @@ Documentation says that mostly the logs and caches are stored there, but it shou
 before going to production.
 
 # TODO:
-[x] Create bucket automatically
-[x] Separated Statefulset with secondary node and PVC for the node
-[ ] Add network security policies to limit in-cluster connections to only needed ones
-[ ] Add ServiceAccount and RBAC to access Kubernetes API by TeamCity to spin up Agents.
-[ ] Define resource limits for minio
-[ ] Use advanced service handling with eg. Istio or to handle failover of main Teamcity service.
+- [x] Create bucket automatically
+- [x] Separated Statefulset with secondary node and PVC for the node
+- [ ] Add network security policies to limit in-cluster connections to only needed ones
+- [ ] Add ServiceAccount and RBAC to access Kubernetes API by TeamCity to spin up Agents.
+- [ ] Define resource limits for minio
+- [ ] Use advanced service handling with eg. Istio or to handle failover of main Teamcity service.
