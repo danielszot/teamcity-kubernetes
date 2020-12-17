@@ -44,7 +44,7 @@ end
 $num_instances ||= 3
 $instance_name_prefix ||= "k8s"
 $vm_gui ||= false
-$vm_memory ||= 2000
+$vm_memory ||= 2500
 $vm_cpus ||= 1
 $shared_folders ||= {}
 $forwarded_ports ||= {}
@@ -66,7 +66,7 @@ $kube_node_instances_with_disks ||= false
 $kube_node_instances_with_disks_size ||= "10G"
 $kube_node_instances_with_disks_number ||= 2
 $override_disk_size ||= false
-$disk_size ||= "10GB"
+$disk_size ||= "15GB"
 $local_path_provisioner_enabled ||= false
 $local_path_provisioner_claim_root ||= "/opt/local-path-provisioner/"
 $libvirt_nested ||= false
