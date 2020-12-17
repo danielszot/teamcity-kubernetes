@@ -130,6 +130,8 @@ configured manually after TeamCity installation.
 
 Please use following address as minio server name: `http://minio.minio.svc`
 
+Buckets are created during the deployment accordingly to list provided in [config.yaml](config.yaml).
+
 ### Production ready considerations
 Minio is configured without any (even self signed) TLS certificates. To make TeamCity to work with self signed
 certs the keystore needs to be generated with the self signed certificate and passed as a default keystore
@@ -179,7 +181,9 @@ Documentation says that mostly the logs and caches are stored there, but it shou
 before going to production.
 
 # TODO:
-* Add network security policies to limit in-cluster connections to only needed ones
-* Add ServiceAccount and RBAC to access Kubernetes API by TeamCity to spin up Agents.
-* Define resource limits for minio
-* Use advanced service handling with eg. Istio or to handle failover of main Teamcity service.
+[x] Create bucket automatically
+[x] Separated Statefulset with secondary node and PVC for the node
+[ ] Add network security policies to limit in-cluster connections to only needed ones
+[ ] Add ServiceAccount and RBAC to access Kubernetes API by TeamCity to spin up Agents.
+[ ] Define resource limits for minio
+[ ] Use advanced service handling with eg. Istio or to handle failover of main Teamcity service.

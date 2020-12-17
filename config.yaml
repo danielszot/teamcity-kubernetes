@@ -10,7 +10,7 @@ common:
       memory: 600Mi
     resources_limits:
       cpu: 300m
-      memory: 600Mi
+      memory: 1Gi
     shared_data_directory:
       nfs_server_ip: 172.18.8.99
       nfs_server_path: /srv/nfs/data
