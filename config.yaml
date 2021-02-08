@@ -6,11 +6,11 @@ common:
     image: jetbrains/teamcity-server:2020.2
     server_mem_opts: -Xmx384m
     resources_requests:
-      cpu: 0m
-      memory: 600Mi
-    resources_limits:
-      cpu: 300m
+      cpu: 500m
       memory: 1Gi
+    resources_limits:
+      cpu: 700m
+      memory: 1400Mi
     shared_data_directory:
       nfs_server_ip: 172.18.8.99
       nfs_server_path: /srv/nfs/data
@@ -32,8 +32,8 @@ common:
     root_password: "{{ env='TCK8S_MYSQL_ROOT_PASSWORD' }}"
     image: "mysql:8.0"
     resources_requests:
-      cpu: 100m
-      memory: 200Mi
+      cpu: 300m
+      memory: 300Mi
     data_directory:
       nfs_server_ip: 172.18.8.99
       nfs_server_path: /srv/nfs/db
