@@ -10,7 +10,7 @@ spec:
   console:
     consoleSecret:
       name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-console-secret"
-    image: minio/console:v0.3.14
+    image: minio/console:v0.4.6
     metadata:
       creationTimestamp: null
       name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}"

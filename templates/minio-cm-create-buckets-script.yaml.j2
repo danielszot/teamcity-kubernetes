@@ -99,7 +99,7 @@ data:
     }
 
     # Try connecting to Minio instance
-    scheme=https
+    scheme=http
     connectToMinio $scheme
 {% if minio['buckets'] is defined %}
 {% for bucket in minio['buckets'] %}

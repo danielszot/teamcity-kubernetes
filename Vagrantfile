@@ -45,7 +45,7 @@ $num_instances ||= 3
 $instance_name_prefix ||= "k8s"
 $vm_gui ||= false
 $vm_memory ||= 2500
-$vm_cpus ||= 1
+$vm_cpus ||= 2
 $shared_folders ||= {}
 $forwarded_ports ||= {}
 $subnet ||= "172.18.8"
@@ -66,7 +66,7 @@ $kube_node_instances_with_disks ||= false
 $kube_node_instances_with_disks_size ||= "10G"
 $kube_node_instances_with_disks_number ||= 2
 $override_disk_size ||= false
-$disk_size ||= "15GB"
+$disk_size ||= "10GB"
 $local_path_provisioner_enabled ||= false
 $local_path_provisioner_claim_root ||= "/opt/local-path-provisioner/"
 $libvirt_nested ||= false
@@ -126,7 +126,7 @@ Vagrant.configure("2") do |config|
     ip = "#{$subnet}.99"
     nfs.vm.network :private_network, ip: ip
     nfs.vm.provider :virtualbox do |vb|
-      vb.memory = 1024
+      vb.memory = 512
       vb.cpus = 1
       vb.gui = $vm_gui
       vb.linked_clone = true
@@ -218,7 +218,7 @@ Vagrant.configure("2") do |config|
       # Install nfs-common to mount NFS
       node.vm.provision "shell", inline: "yes | apt install nfs-common"
 
-      node.vm.provision "shell", inline: "mkdir -p /data/minio; chown 1000:1000 /data/minio/"
+      node.vm.provision "shell", inline: "mkdir -p /data/minio/export0; mkdir -p /data/minio/export1; chown -R 1000:1000 /data/minio/"
 
       # Disable firewalld on oraclelinux/redhat vms
       if ["oraclelinux","oraclelinux8","rhel7","rhel8"].include? $os

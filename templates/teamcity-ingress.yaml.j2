@@ -20,6 +20,6 @@ spec:
 {% for i in range(teamcity['secondary_nodes_replicas']) %}
           - path: /maintenance/secondary/{{ i }}
             backend:
-              serviceName: "{{ teamcity['app_name'] }}-secondary-{{ i }}"
+              serviceName: "{{ teamcity['app_name'] }}-svc-secondary-{{ i }}"
               servicePort: 80
 {% endfor %}

@@ -4,7 +4,7 @@ common:
     namespace: teamcity
     app_name: teamcity
     image: jetbrains/teamcity-server:2020.2
-    server_mem_opts: -Xmx512m
+    server_mem_opts: -Xmx384m
     resources_requests:
       cpu: 0m
       memory: 600Mi

@@ -27,6 +27,7 @@ git clone https://github.com/kubernetes-sigs/kubespray.git`
 
 # Copy ./Vagrantfile to ./kubespray/Vagrantfile
 cp ./Vagrantfile ./kubespray/Vagrantfile
+cp ./bootstrap-nfs.sh ./kubespray/bootstrap-nfs.sh
 
 # Start cluster
 cd ./kubespray
@@ -69,9 +70,13 @@ To setup Minio, the official Minio operator will be used. It is required to inst
 
 Follow guidelines to install Krew: https://krew.sigs.k8s.io/docs/user-guide/setup/install/
 
-Execute below command to initiate Minio operator in the cluster.
+Then install minio operator using `krew`
 
 `kubectl krew install minio`
+
+Execute below command to initiate Minio operator in the cluster.
+
+`kubectl minio init`
 
 Minio operator will reside in `default` namespace. 
 The Tenant and all other needed objects will reside in the "minio" namespace.
@@ -106,6 +111,7 @@ It could be also used with tags to deploy service by service:
 ```
 k8s-handle deploy -s=vagrant --use-kubeconfig --tags=mysql
 k8s-handle deploy -s=vagrant --use-kubeconfig --tags=minio
+k8s-handle deploy -s=vagrant --use-kubeconfig --tags=create-bucket
 k8s-handle deploy -s=vagrant --use-kubeconfig --tags=teamcity
 ```
 

@@ -14,6 +14,7 @@ spec:
       protocol: TCP
   selector:
     app: "{{ teamcity['app_name'] }}"
+    node: "primary"
 
 ---
 apiVersion: v1

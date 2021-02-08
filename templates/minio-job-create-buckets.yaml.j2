@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "{{ minio['app_name'] }}-job-create-buckets"
+  namespace: "{{ minio['namespace'] }}"
   labels:
     app: "{{ minio['app_name'] }}"
 spec:
@@ -20,15 +21,6 @@ spec:
                 name: "{{ minio['app_name'] }}-cm-create-buckets-script"
             - secret:
                 name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-creds-secret"
-        - name: minio-tls
-          projected:
-            defaultMode: 420
-            sources:
-            - secret:
-                items:
-                - key: public.crt
-                  path: CAs/public.crt
-                name: "{{ minio['app_name'] }}-{{ teamcity['app_name'] }}-tls"
       containers:
       - name: minio-mc
         image: "{{ minio['mc_image'] }}"
@@ -37,10 +29,8 @@ spec:
           - name: MINIO_ENDPOINT
             value: "{{ minio['app_name'] }}"
           - name: MINIO_PORT
-            value: "443"
+            value: "80"
         volumeMounts:
           - name: minio-configuration
             mountPath: /config
-          - name: minio-tls
-            mountPath: /tmp/certs
 {% endif %}
